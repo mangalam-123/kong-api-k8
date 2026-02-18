@@ -1,0 +1,589 @@
+    <!-- ==================== CREATE USER API ==================== -->
+    <h2>5. Create User API (Protected)</h2>
+    <div class="api-card">
+        <div>
+            <span class="method post">POST</span>
+            <span class="endpoint">/users</span>
+            <span class="auth-badge auth-required">JWT Required</span>
+        </div>
+        <div class="description">
+            <strong>Purpose:</strong> Create a new user (admin only).<br>
+            <strong>Use Case:</strong> Admin user management.<br>
+            <strong>Security:</strong> Requires valid JWT token (login as admin first).
+        </div>
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr>
+                <td>Authorization</td>
+                <td>Header</td>
+                <td>✅ Required</td>
+                <td>Bearer token from /login (e.g., "Bearer eyJ...")</td>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>Body (JSON)</td>
+                <td>✅ Required</td>
+                <td>New user's username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>Body (JSON)</td>
+                <td>✅ Required</td>
+                <td>New user's password</td>
+            </tr>
+        </table>
+        <div class="params-section">
+            <label><strong>New Username:</strong></label>
+            <input type="text" id="create-username" value="user1" placeholder="Enter new username">
+            <br><br>
+            <label><strong>New Password:</strong></label>
+            <input type="password" id="create-password" value="userpass" placeholder="Enter new password">
+        </div>
+        <h4>Request Body</h4>
+        <div class="code-block">{
+  "username": "user1",
+  "password": "userpass"
+}</div>
+        <h4>Expected Response (Success)</h4>
+        <div class="code-block">{
+  "id": 2,
+  "username": "user1"
+}</div>
+        <h4>Expected Response (Username exists)</h4>
+        <div class="code-block">{
+  "detail": "Username already exists"
+}</div>
+        <button onclick="testCreateUser()">▶ Create User</button>
+        <div id="createuser-response" class="response-area">
+            <div class="response-status" id="createuser-status"></div>
+            <div class="response-body" id="createuser-body"></div>
+        </div>
+    </div>
+        async function testCreateUser() {
+            const username = document.getElementById('create-username').value;
+            const password = document.getElementById('create-password').value;
+            const headers = { 'Content-Type': 'application/json' };
+            if (storedToken) headers['Authorization'] = 'Bearer ' + storedToken;
+            try {
+                const res = await fetch(API_BASE + '/users', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                showResponse('createuser', res.status + ' ' + res.statusText, data, res.ok);
+            } catch (e) {
+                showResponse('createuser', 'Error', e.message, false);
+            }
+        }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kong API Platform - Test Console</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #1a1a2e; border-bottom: 3px solid #4a90d9; padding-bottom: 10px; }
+        h2 { color: #16213e; margin-top: 30px; }
+        .api-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .get { background: #61affe; color: white; }
+        .post { background: #49cc90; color: white; }
+        .endpoint {
+            font-family: monospace;
+            font-size: 16px;
+            color: #333;
+        }
+        .description {
+            color: #666;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 3px solid #4a90d9;
+        }
+        .auth-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        .auth-required { background: #ffeaa7; color: #d35400; }
+        .auth-optional { background: #dfe6e9; color: #636e72; }
+        .no-auth { background: #55efc4; color: #00b894; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+        }
+        th { background: #f1f3f4; }
+        .code-block {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #4a90d9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+        }
+        button:hover { background: #357abd; }
+        button.secondary { background: #636e72; }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .response-area {
+            margin-top: 15px;
+            padding: 15px;
+            background: #2d3436;
+            border-radius: 5px;
+            display: none;
+        }
+        .response-area.show { display: block; }
+        .response-status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .status-ok { color: #55efc4; }
+        .status-error { color: #ff7675; }
+        .response-body {
+            color: #dfe6e9;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+        .token-display {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .section-divider {
+            border-top: 2px solid #e0e0e0;
+            margin: 40px 0 20px 0;
+        }
+        #stored-token {
+            padding: 10px;
+            background: #d4edda;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+        }
+        .params-section { margin: 15px 0; }
+        .copy-btn {
+            background: #636e72;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🦍 Kong API Platform - Interactive Test Console</h1>
+    
+    <div class="api-card">
+        <h3>🔑 Current JWT Token</h3>
+        <div id="stored-token">No token stored. Use the Login API to get a token.</div>
+        <button class="secondary" onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <div class="section-divider"></div>
+    
+    <!-- ==================== HEALTH API ==================== -->
+    <h2>1. Health Check API</h2>
+    <div class="api-card">
+        <div>
+            <span class="method get">GET</span>
+            <span class="endpoint">/health</span>
+            <span class="auth-badge no-auth">No Auth Required</span>
+        </div>
+        
+        <div class="description">
+            <strong>Purpose:</strong> Check if the API service is running and healthy.<br>
+            <strong>Use Case:</strong> Kubernetes liveness/readiness probes, monitoring systems, load balancer health checks.<br>
+            <strong>Parameters:</strong> None required.
+        </div>
+
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td colspan="4"><em>No parameters required</em></td></tr>
+        </table>
+
+        <h4>Expected Response</h4>
+        <div class="code-block">{
+  "status": "ok"
+}</div>
+
+        <button onclick="testHealth()">▶ Test /health</button>
+        <div id="health-response" class="response-area">
+            <div class="response-status" id="health-status"></div>
+            <div class="response-body" id="health-body"></div>
+        </div>
+    </div>
+
+    <!-- ==================== VERIFY API ==================== -->
+    <h2>2. Token Verification API</h2>
+    <div class="api-card">
+        <div>
+            <span class="method get">GET</span>
+            <span class="endpoint">/verify</span>
+            <span class="auth-badge auth-optional">Auth Optional</span>
+        </div>
+        
+        <div class="description">
+            <strong>Purpose:</strong> Verify if a JWT token is valid and extract user information from it.<br>
+            <strong>Use Case:</strong> Frontend apps checking if user session is still valid, token introspection.<br>
+            <strong>Parameters:</strong> Optional Bearer token in Authorization header.
+        </div>
+
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr>
+                <td>Authorization</td>
+                <td>Header</td>
+                <td>Optional</td>
+                <td>Bearer token (e.g., "Bearer eyJ...")</td>
+            </tr>
+        </table>
+
+        <h4>Expected Response (without token)</h4>
+        <div class="code-block">{
+  "status": "ok",
+  "token_provided": false
+}</div>
+
+        <h4>Expected Response (with valid token)</h4>
+        <div class="code-block">{
+  "status": "ok",
+  "token_provided": true,
+  "subject": "admin"    // Username from token
+}</div>
+
+        <button onclick="testVerify(false)">▶ Test WITHOUT Token</button>
+        <button onclick="testVerify(true)">▶ Test WITH Token</button>
+        <div id="verify-response" class="response-area">
+            <div class="response-status" id="verify-status"></div>
+            <div class="response-body" id="verify-body"></div>
+        </div>
+    </div>
+
+    <!-- ==================== LOGIN API ==================== -->
+    <h2>3. Login API (Authentication)</h2>
+    <div class="api-card">
+        <div>
+            <span class="method post">POST</span>
+            <span class="endpoint">/login</span>
+            <span class="auth-badge no-auth">No Auth Required</span>
+        </div>
+        
+        <div class="description">
+            <strong>Purpose:</strong> Authenticate user with username/password and receive a JWT token.<br>
+            <strong>Use Case:</strong> User login, obtaining access token for protected APIs.<br>
+            <strong>Token Validity:</strong> 60 minutes (3600 seconds).
+        </div>
+
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr>
+                <td>username</td>
+                <td>Body (JSON)</td>
+                <td>✅ Required</td>
+                <td>User's username (default: "admin")</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>Body (JSON)</td>
+                <td>✅ Required</td>
+                <td>User's password (default: "admin123")</td>
+            </tr>
+        </table>
+
+        <div class="params-section">
+            <label><strong>Username:</strong></label>
+            <input type="text" id="login-username" value="admin" placeholder="Enter username">
+            <br><br>
+            <label><strong>Password:</strong></label>
+            <input type="password" id="login-password" value="admin123" placeholder="Enter password">
+        </div>
+
+        <h4>Request Body</h4>
+        <div class="code-block">{
+  "username": "admin",
+  "password": "admin123"
+}</div>
+
+        <h4>Expected Response (Success)</h4>
+        <div class="code-block">{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 3600    // Token valid for 60 minutes
+}</div>
+
+        <h4>Expected Response (Invalid Credentials)</h4>
+        <div class="code-block">{
+  "detail": "Invalid credentials"
+}</div>
+
+        <button onclick="testLogin()">▶ Login & Get Token</button>
+        <button class="secondary" onclick="testLoginWrong()">▶ Test Wrong Password</button>
+        <div id="login-response" class="response-area">
+            <div class="response-status" id="login-status"></div>
+            <div class="response-body" id="login-body"></div>
+        </div>
+    </div>
+
+    <!-- ==================== USERS API ==================== -->
+    <h2>4. Users API (Protected)</h2>
+    <div class="api-card">
+        <div>
+            <span class="method get">GET</span>
+            <span class="endpoint">/users</span>
+            <span class="auth-badge auth-required">JWT Required</span>
+        </div>
+        
+        <div class="description">
+            <strong>Purpose:</strong> Retrieve list of all users from the database.<br>
+            <strong>Use Case:</strong> Admin dashboard, user management.<br>
+            <strong>Security:</strong> Requires valid JWT token. Kong validates the token before forwarding request.
+        </div>
+
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr>
+                <td>Authorization</td>
+                <td>Header</td>
+                <td>✅ Required</td>
+                <td>Bearer token from /login (e.g., "Bearer eyJ...")</td>
+            </tr>
+        </table>
+
+        <h4>Expected Response (with valid token)</h4>
+        <div class="code-block">{
+  "requested_by": "admin",    // User who made the request
+  "users": [
+    {
+      "id": 1,
+      "username": "admin"
+    }
+  ]
+}</div>
+
+        <h4>Expected Response (without token / invalid token)</h4>
+        <div class="code-block">{
+  "message": "Unauthorized"
+}</div>
+
+        <button onclick="testUsers(true)">▶ Test WITH Token</button>
+        <button class="secondary" onclick="testUsers(false)">▶ Test WITHOUT Token</button>
+        <div id="users-response" class="response-area">
+            <div class="response-status" id="users-status"></div>
+            <div class="response-body" id="users-body"></div>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- ==================== API SUMMARY ==================== -->
+    <h2>📋 API Summary</h2>
+    <div class="api-card">
+        <table>
+            <tr>
+                <th>Endpoint</th>
+                <th>Method</th>
+                <th>Auth</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td><code>/health</code></td>
+                <td><span class="method get">GET</span></td>
+                <td>None</td>
+                <td>Health check for monitoring</td>
+            </tr>
+            <tr>
+                <td><code>/verify</code></td>
+                <td><span class="method get">GET</span></td>
+                <td>Optional</td>
+                <td>Validate JWT token</td>
+            </tr>
+            <tr>
+                <td><code>/login</code></td>
+                <td><span class="method post">POST</span></td>
+                <td>None</td>
+                <td>Authenticate & get JWT</td>
+            </tr>
+            <tr>
+                <td><code>/users</code></td>
+                <td><span class="method get">GET</span></td>
+                <td>JWT Required</td>
+                <td>List all users (protected)</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let storedToken = localStorage.getItem('jwt_token') || '';
+        
+        // Update token display on load
+        updateTokenDisplay();
+
+        function updateTokenDisplay() {
+            const el = document.getElementById('stored-token');
+            if (storedToken) {
+                el.innerHTML = '<strong>Token:</strong> ' + storedToken.substring(0, 50) + '...<br><br>' +
+                    '<strong>Full token:</strong><br>' + storedToken;
+                el.style.background = '#d4edda';
+                el.style.borderColor = '#28a745';
+            } else {
+                el.textContent = 'No token stored. Use the Login API to get a token.';
+                el.style.background = '#fff3cd';
+                el.style.borderColor = '#ffc107';
+            }
+        }
+
+        function storeToken(token) {
+            storedToken = token;
+            localStorage.setItem('jwt_token', token);
+            updateTokenDisplay();
+        }
+
+        function clearToken() {
+            storedToken = '';
+            localStorage.removeItem('jwt_token');
+            updateTokenDisplay();
+        }
+
+        function showResponse(prefix, status, body, isOk) {
+            const responseEl = document.getElementById(prefix + '-response');
+            const statusEl = document.getElementById(prefix + '-status');
+            const bodyEl = document.getElementById(prefix + '-body');
+            
+            responseEl.classList.add('show');
+            statusEl.textContent = 'Status: ' + status;
+            statusEl.className = 'response-status ' + (isOk ? 'status-ok' : 'status-error');
+            bodyEl.textContent = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+        }
+
+        async function testHealth() {
+            try {
+                const res = await fetch(API_BASE + '/health');
+                const data = await res.json();
+                showResponse('health', res.status + ' ' + res.statusText, data, res.ok);
+            } catch (e) {
+                showResponse('health', 'Error', e.message, false);
+            }
+        }
+
+        async function testVerify(withToken) {
+            try {
+                const headers = {};
+                if (withToken && storedToken) {
+                    headers['Authorization'] = 'Bearer ' + storedToken;
+                }
+                const res = await fetch(API_BASE + '/verify', { headers });
+                const data = await res.json();
+                showResponse('verify', res.status + ' ' + res.statusText, data, res.ok);
+            } catch (e) {
+                showResponse('verify', 'Error', e.message, false);
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const res = await fetch(API_BASE + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                showResponse('login', res.status + ' ' + res.statusText, data, res.ok);
+                
+                if (res.ok && data.access_token) {
+                    storeToken(data.access_token);
+                }
+            } catch (e) {
+                showResponse('login', 'Error', e.message, false);
+            }
+        }
+
+        async function testLoginWrong() {
+            try {
+                const res = await fetch(API_BASE + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'wrongpassword' })
+                });
+                const data = await res.json();
+                showResponse('login', res.status + ' ' + res.statusText, data, res.ok);
+            } catch (e) {
+                showResponse('login', 'Error', e.message, false);
+            }
+        }
+
+        async function testUsers(withToken) {
+            try {
+                const headers = {};
+                if (withToken && storedToken) {
+                    headers['Authorization'] = 'Bearer ' + storedToken;
+                }
+                const res = await fetch(API_BASE + '/users', { headers });
+                const data = await res.json();
+                showResponse('users', res.status + ' ' + res.statusText, data, res.ok);
+            } catch (e) {
+                showResponse('users', 'Error', e.message, false);
+            }
+        }
+    </script>
+</body>
+</html>
