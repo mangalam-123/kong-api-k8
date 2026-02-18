@@ -53,18 +53,35 @@
         <div class="code-block">{
   "detail": "Username already exists"
 }</div>
-        <button onclick="testCreateUser()">▶ Create User</button>
+        <button onclick="testCreateUserAndLogin()">▶ Create User & Get JWT</button>
         <div id="createuser-response" class="response-area">
             <div class="response-status" id="createuser-status"></div>
             <div class="response-body" id="createuser-body"></div>
         </div>
     </div>
-        async function testCreateUser() {
+    <script>
+        // ...existing code...
+        async function testCreateUserAndLogin() {
             const username = document.getElementById('create-username').value;
             const password = document.getElementById('create-password').value;
             const headers = { 'Content-Type': 'application/json' };
             if (storedToken) headers['Authorization'] = 'Bearer ' + storedToken;
+            // Check if admin JWT is present
+            if (!storedToken) {
+                showResponse('createuser', 'Error', 'You must login as admin first to create users.', false);
+                return;
+            }
+            // Optionally, verify token is for admin
             try {
+                const verifyRes = await fetch(API_BASE + '/verify', {
+                    headers: { 'Authorization': 'Bearer ' + storedToken }
+                });
+                const verifyData = await verifyRes.json();
+                if (!verifyRes.ok || verifyData.subject !== 'admin') {
+                    showResponse('createuser', 'Error', 'You must login as admin to create users.', false);
+                    return;
+                }
+                // Step 1: Create user
                 const res = await fetch(API_BASE + '/users', {
                     method: 'POST',
                     headers,
@@ -72,10 +89,25 @@
                 });
                 const data = await res.json();
                 showResponse('createuser', res.status + ' ' + res.statusText, data, res.ok);
+                if (res.ok && data.username) {
+                    // Step 2: Login as new user to get JWT
+                    const loginRes = await fetch(API_BASE + '/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const loginData = await loginRes.json();
+                    if (loginRes.ok && loginData.access_token) {
+                        storeToken(loginData.access_token);
+                        showResponse('createuser', 'JWT generated for new user', loginData, true);
+                    }
+                }
             } catch (e) {
                 showResponse('createuser', 'Error', e.message, false);
             }
         }
+        // ...existing code...
+    </script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
