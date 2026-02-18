@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-ddos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-ddos
+  template:
+    metadata:
+      labels:
+        app: nginx-ddos
+    spec:
+      containers:
+        - name: nginx
+          image: {{ .Values.nginx.image }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: {{ .Values.nginx.configmap.mountPath }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ .Values.nginx.configmap.name }}

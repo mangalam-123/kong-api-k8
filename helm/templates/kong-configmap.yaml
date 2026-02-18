@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.kong.configmap.name }}
+data:
+  kong.yaml: |
+    # Paste your Kong declarative config here or use .Files.Get
